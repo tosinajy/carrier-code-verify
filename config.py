@@ -38,7 +38,7 @@ DB_CONFIG = {
     'user': 'root',
     # Decrypts the password at the moment of access
     'password': 'vaug', # decrypt_secret(ENC_DB_PASSWORD),
-    'database': 'ccv1'
+    'database': 'carrier_code_verify'
 }
 
 # Email Configuration

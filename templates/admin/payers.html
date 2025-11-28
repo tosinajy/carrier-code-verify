@@ -1,0 +1,188 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Payer Management</h2>
+    <div>
+        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fa-solid fa-file-excel me-2"></i>Import Payers
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fa-solid fa-plus me-2"></i>Add Single
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="unassigned" {% if filter_status == 'unassigned' %}selected{% endif %}>Unassigned Payers</option>
+                    <option value="assigned" {% if filter_status == 'assigned' %}selected{% endif %}>Assigned Payers</option>
+                    <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All Payers</option>
+                </select>
+            </div>
+            <div class="col-md-7">
+                <input type="text" name="search" class="form-control" placeholder="Search Payers..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Payer Name</th>
+                    <th>Payer ID</th>
+                    <th>Clearing House</th>
+                    <th>NAIC Assignment</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payers %}
+                <tr>
+                    <td class="fw-bold">{{ p.payer_name }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ p.payer_code }}</span></td>
+                    <td>{{ p.clearing_house or '-' }}</td>
+                    <td>
+                        {% if p.cocode %}
+                            {{ p.naic_company }} ({{ p.cocode }})
+                        {% else %}
+                            <span class="text-muted fst-italic">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.mapping_status == 'approved' %}
+                            <span class="badge bg-success">Live</span>
+                        {% elif p.mapping_status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif p.mapping_status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                onclick="openAssignModal('{{ p.payer_id }}', '{{ p.payer_name|escape }}')">
+                            <i class="fa-solid fa-link me-1"></i>Assign
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center py-4">No payers found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('assign_naic') }}" method="POST">
+            <input type="hidden" name="payer_id" id="assign_payer_id">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign NAIC to <span id="assign_payer_name" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Search NAIC / Company Name</label>
+                        <div class="ui fluid search selection dropdown" id="naic_dropdown">
+                            <input type="hidden" name="naic_id">
+                            <i class="dropdown icon"></i>
+                            <div class="default text">Search Company...</div>
+                            <div class="menu"></div>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="no_naic" id="no_naic_check">
+                        <label class="form-check-label" for="no_naic_check">No NAIC Code for this Payer</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit for Approval</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('import_payers') }}" method="POST" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import Payers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Clearing House <span class="text-danger">*</span></label>
+                        <select name="clearing_house" class="form-select" required>
+                            <option value="">Select...</option>
+                            <option value="Claim.MD">Claim.MD</option>
+                            <option value="UHIN">UHIN</option>
+                            <option value="Availity">Availity</option>
+                            <option value="Change Healthcare">Change Healthcare</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Excel File <span class="text-danger">*</span></label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+                        <div class="form-text">Headers required: 'Payer ID', 'Payer Name'</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Upload & Process</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('add_single_payer') }}" method="POST">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Add Single Payer</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label>Payer Name *</label><input type="text" name="payer_name" class="form-control" required></div>
+                    <div class="mb-3"><label>Payer ID *</label><input type="text" name="payer_code" class="form-control" required></div>
+                    <div class="mb-3"><label>Clearing House</label><input type="text" name="clearing_house" class="form-control"></div>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Add Payer</button></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openAssignModal(id, name) {
+        document.getElementById('assign_payer_id').value = id;
+        document.getElementById('assign_payer_name').innerText = name;
+        new bootstrap.Modal(document.getElementById('assignModal')).show();
+    }
+
+    $(document).ready(function() {
+        $('#naic_dropdown').dropdown({
+            apiSettings: {
+                url: '/api/naic-lookup?q={query}'
+            },
+            minCharacters: 2,
+            saveRemoteData: false
+        });
+    });
+</script>
+{% endblock %}

@@ -2,74 +2,67 @@
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="mb-4">Carrier Directory</h1>
     
-    <!-- Search Form -->
-    <form class="row g-3 mb-4" method="GET" action="{{ url_for('directory') }}">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by Carrier Name, NAIC, or Payer ID..." value="{{ search }}">
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-search me-2"></i>Search</button>
-            </div>
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h1 class="h2 mb-1">Carrier Directory</h1>
+            <p class="text-muted small mb-0">Browse trusted payer and carrier mappings.</p>
         </div>
-        <div class="col-auto">
-            <a href="{{ url_for('directory') }}" class="btn btn-outline-secondary">Reset</a>
-        </div>
-    </form>
+        
+        <!-- Search Form -->
+        <form class="d-flex gap-2" method="GET" action="{{ url_for('directory') }}">
+            <input type="text" name="search" class="form-control form-control-sm" style="width: 250px;" placeholder="Search..." value="{{ search }}">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <a href="{{ url_for('directory') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+        </form>
+    </div>
 
-    <div class="card shadow-sm">
+    <div class="card border-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead class="bg-light">
                     <tr>
-                        <th style="width: 30%;">Carrier Name</th>
-                        <th style="width: 10%;">NAIC</th>
-                        <th style="width: 10%;">Payer ID</th>
-                        <th style="width: 20%;">Transaction</th>
-                        <th style="width: 10%;">WC Auto</th>
-                        <th style="width: 20%;">Clearing Houses</th>
+                        <th style="width: 15%;">Payer ID</th>
+                        <th style="width: 35%;">Payer Name</th>
+                        <th style="width: 15%;">NAIC Code</th>
+                        <th style="width: 25%;">Clearing Houses</th>
+                        <th style="width: 10%;" class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for carrier in carriers %}
+                    {% for c in carriers %}
                     <tr>
-                        <!-- Carrier Name Link -->
                         <td>
-                            <a href="{{ url_for('carrier_details', naic_code=carrier.naic_code) }}" class="text-decoration-none fw-bold">
-                                {{ carrier.legal_name }}
+                            <span class="badge bg-light text-dark border font-monospace">{{ c.payer_code }}</span>
+                        </td>
+                        <td class="fw-semibold text-primary-custom">
+                            {{ c.payer_name }}
+                        </td>
+                        <td>
+                            {% if c.cocode %}
+                                <span class="badge bg-light text-muted border">{{ c.cocode }}</span>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if c.clearing_houses %}
+                                <span class="small text-secondary">{{ c.clearing_houses }}</span>
+                            {% else %}
+                                <span class="text-muted small italic">None Listed</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('carrier_details', carrier_id=c.carrier_id) }}" class="btn btn-sm btn-outline-primary">
+                                Details
                             </a>
-                        </td>
-                        <td>{{ carrier.naic_code }}</td>
-                        <td>
-                            {% if carrier.payer_code %}
-                                <span class="badge bg-light text-dark border">{{ carrier.payer_code }}</span>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td class="small text-secondary">{{ carrier.transaction or '-' }}</td>
-                        <td>
-                            <!-- WC Auto Logic: 1 = Yes, 0 = No -->
-                            {% if carrier.wc_auto == 1 %}
-                                <i class="fa-solid fa-check-circle text-success" title="Yes"></i>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if carrier.clearing_houses %}
-                                {% set ch_list = carrier.clearing_houses.split(', ') %}
-                                {% for ch in ch_list %}
-                                    <span class="badge bg-info text-dark me-1 mb-1">{{ ch }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted small">N/A</span>
-                            {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">No carriers found matching your criteria.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <p class="mb-0">No carriers found matching your criteria.</p>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -79,11 +72,11 @@
 
     <!-- Pagination -->
     <nav class="mt-4">
-        <ul class="pagination justify-content-center">
+        <ul class="pagination justify-content-center pagination-sm">
             {% if page > 1 %}
             <li class="page-item"><a class="page-link" href="{{ url_for('directory', page=page-1, search=search) }}">Previous</a></li>
             {% endif %}
-            <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+            <li class="page-item disabled"><span class="page-link border-0 bg-transparent text-muted">Page {{ page }} of {{ total_pages }}</span></li>
             {% if page < total_pages %}
             <li class="page-item"><a class="page-link" href="{{ url_for('directory', page=page+1, search=search) }}">Next</a></li>
             {% endif %}

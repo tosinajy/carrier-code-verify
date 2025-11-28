@@ -2,35 +2,46 @@
 
 {% block content %}
     <div class="container text-center mt-4">
-        <div id="ad-banner-top" class="ad-placeholder ad-banner-top">
-            AD SPACE - LEADERBOARD (970x90)
+        {% if show_ads %}
+        <div id="ad-banner-top" class="native-ad-container">
+            <span class="ad-label">Sponsored</span>
+            <div class="ad-content fw-bold text-muted">
+                Premium Insurance Software Solutions - Automate Your Claims Today.
+            </div>
         </div>
+        {% endif %}
     </div>
 
-    <div class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-5 fw-bold mb-3">Verify Insurance Carriers Instantly</h1>
+    <div class="hero-section text-center mb-5">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-3 text-primary">Verify Insurance Payers Instantly</h1>
             <p class="lead mb-5 text-secondary mx-auto" style="max-width: 600px;">
-                Access real-time data for NAIC codes, Payer IDs, and claims contact information.
+                The most accurate, crowdsourced database for Payer IDs, NAIC codes, and Clearing House mappings. Trusted by thousands of providers.
             </p>
             
             <div class="mx-auto" style="max-width: 700px;">
                 <div class="input-group input-group-lg shadow-sm rounded-3 position-relative">
-                    <span class="input-group-text bg-white border-0 ps-4"><i class="fa-solid fa-search text-muted"></i></span>
+                    <span class="input-group-text bg-white border-0 ps-4"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     
-                    <!-- Wrapped Input for Autocomplete -->
                     <div class="flex-grow-1 position-relative">
-                        <input type="text" id="search-input" class="form-control border-0 ps-2" 
-                               placeholder="Enter Carrier Name, NAIC, or Payer ID..." 
+                        <!-- Muted placeholder per guidelines -->
+                        <input type="text" id="search-input" class="form-control border-0 ps-2 shadow-none" 
+                               placeholder="Search by Payer Name, ID, or NAIC..." 
                                aria-label="Search" 
                                autocomplete="off">
-                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                        <div id="autocomplete-list" class="autocomplete-items text-start" style="display:none;"></div>
                     </div>
 
-                    <button class="btn btn-primary px-4" type="button" id="search-button">
-                        Verify Now
+                    <button class="btn btn-primary px-4 fw-semibold" type="button" id="search-button">
+                        Verify
                     </button>
                 </div>
+            </div>
+            
+            <div class="mt-4 text-muted small">
+                <i class="fa-solid fa-check-circle text-success me-1"></i> Updated Daily &nbsp;
+                <i class="fa-solid fa-check-circle text-success me-1"></i> Verified Data &nbsp;
+                <i class="fa-solid fa-check-circle text-success me-1"></i> Free Access
             </div>
         </div>
     </div>

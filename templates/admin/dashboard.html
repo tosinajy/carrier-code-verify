@@ -7,8 +7,8 @@
     <div class="col-md-3">
         <div class="card bg-primary text-white h-100 shadow-sm">
             <div class="card-body">
-                <h6 class="text-uppercase opacity-75">Total Carriers</h6>
-                <h2 class="display-5 fw-bold mb-0">{{ "{:,}".format(total_carriers) }}</h2>
+                <h6 class="text-uppercase opacity-75">Total Payers</h6>
+                <h2 class="display-5 fw-bold mb-0">{{ "{:,}".format(total_payers) }}</h2>
             </div>
         </div>
     </div>
@@ -23,105 +23,23 @@
     </div>
 
     <div class="col-md-3">
-        <div class="card bg-success text-white h-100 shadow-sm">
-            <div class="card-body">
-                <h6 class="text-uppercase opacity-75">Total Payer IDs</h6>
-                <h2 class="display-5 fw-bold mb-0">{{ "{:,}".format(total_payers) }}</h2>
+        <div class="card bg-warning text-dark h-100 shadow-sm">
+            <div class="card-body position-relative">
+                <h6 class="text-uppercase opacity-75">Pending Approvals</h6>
+                <h2 class="display-5 fw-bold mb-0">{{ pending_approvals }}</h2>
+                <a href="{{ url_for('admin_approvals') }}" class="stretched-link"></a>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card bg-warning text-dark h-100 shadow-sm">
+        <div class="card bg-secondary text-white h-100 shadow-sm">
             <div class="card-body position-relative">
-                <h6 class="text-uppercase opacity-75">Pending Edits</h6>
-                <h2 class="display-5 fw-bold mb-0">{{ pending_count or 0 }}</h2>
-                <a href="{{ url_for('admin_queue') }}" class="stretched-link"></a>
+                <h6 class="text-uppercase opacity-75">Unassigned Payers</h6>
+                <h2 class="display-5 fw-bold mb-0">{{ unassigned_payers }}</h2>
+                <a href="{{ url_for('admin_payers') }}" class="stretched-link"></a>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row g-4">
-    <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-header fw-bold bg-white py-3">
-                <i class="fa-solid fa-chart-bar me-2 text-primary"></i>Daily Contributions (Last 30 Days)
-            </div>
-            <div class="card-body">
-                <canvas id="contributionsChart" style="height: 300px; width: 100%;"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-header fw-bold bg-white py-3">
-                <i class="fa-solid fa-table me-2 text-success"></i>Data Quality Report
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Dataset</th>
-                                <th>Missing / Total Count</th>
-                                <th class="text-end">Completion Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in dq_report %}
-                            <tr>
-                                <td class="fw-medium">{{ row.dataset }}</td>
-                                <td class="text-muted small">{{ row.count }} / {{ row.total }}</td>
-                                <td class="text-end">
-                                    <span class="badge {% if row.percentage > 80 %}bg-success{% elif row.percentage > 50 %}bg-warning{% else %}bg-danger{% endif %} text-dark">
-                                        {{ row.percentage }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('contributionsChart').getContext('2d');
-        const labels = {{ chart_labels | tojson }};
-        const dataPoints = {{ chart_data | tojson }};
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Edits Submitted',
-                    data: dataPoints,
-                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                    borderColor: 'rgba(13, 110, 253, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { precision: 0 }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-    });
-</script>
 {% endblock %}

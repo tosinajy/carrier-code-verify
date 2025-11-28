@@ -1,0 +1,50 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<h2>Pending Approvals</h2>
+<p class="text-muted mb-4">Review Payer to NAIC assignments.</p>
+
+<form action="{{ url_for('process_approvals') }}" method="POST">
+    <div class="mb-3 d-flex gap-2">
+        <button type="submit" name="action" value="approve" class="btn btn-success">
+            <i class="fa-solid fa-check me-2"></i>Approve Selected
+        </button>
+        <button type="submit" name="action" value="reject" class="btn btn-danger">
+            <i class="fa-solid fa-xmark me-2"></i>Reject Selected
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                    <th>Payer Name</th>
+                    <th>Payer ID</th>
+                    <th>Assigned NAIC</th>
+                    <th>Company Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pendings %}
+                <tr>
+                    <td><input type="checkbox" name="payer_ids" value="{{ p.payer_id }}" class="row-check"></td>
+                    <td class="fw-bold">{{ p.payer_name }}</td>
+                    <td>{{ p.payer_code }}</td>
+                    <td>{{ p.cocode or 'None' }}</td>
+                    <td>{{ p.company_name or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">No pending approvals.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<script>
+    document.getElementById('selectAll').addEventListener('change', function() {
+        document.querySelectorAll('.row-check').forEach(c => c.checked = this.checked);
+    });
+</script>
+{% endblock %}

@@ -1,298 +1,140 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ carrier.legal_name }} | NAIC {{ carrier.cocode }} | CarrierCodeVerify{% endblock %}
+{% block title %}{{ carrier.payer_name }} Verification | Payer ID {{ carrier.payer_code }}{% endblock %}
+{% block meta_description %}Verify Payer ID {{ carrier.payer_code }} for {{ carrier.payer_name }}. Get correct NAIC codes and clearing house details instantly.{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ carrier.payer_name }}",
+  "identifier": "{{ carrier.payer_code }}",
+  "additionalType": "HealthInsurancePayer"
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    
-    <!-- Header Section -->
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-8">
-            <div class="d-flex align-items-center">
-                <h1 class="fw-bold mb-0 me-3">{{ carrier.legal_name }}</h1>
-                <button class="btn btn-link p-0 text-secondary fs-4" onclick="copyToClipboard('{{ carrier.legal_name }}')" title="Copy Legal Name">
-                    <i class="fa-regular fa-copy"></i>
-                </button>
-                {% if carrier.am_best_rating %}
-                <span class="badge bg-dark fs-6 align-middle ms-3" title="AM Best Rating">{{ carrier.am_best_rating }}</span>
-                {% endif %}
-            </div>
-            
-            <div class="text-muted small mt-2">
-                Last Updated: {{ carrier.update_dt or 'Recently' }} | 
-                <span class="text-uppercase">{{ carrier.state_domicile }} Domicile</span>
-            </div>
-            
-            <div class="mt-2">
-                {% for lob in carrier.lobs %}
-                <span class="badge bg-info text-dark me-1">{{ lob.lob }}</span>
-                {% else %}
-                <span class="badge bg-light text-secondary border">General</span>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="fa-solid fa-print me-2"></i>Print</button>
-            <!-- CHANGED: Link to separate page instead of Modal -->
-            <a href="{{ url_for('suggest_edit_form', carrier_id=carrier.carrier_id) }}" class="btn btn-primary btn-sm ms-2">
-                <i class="fa-solid fa-pen-to-square me-2"></i>Suggest Edit
-            </a>
+    <!-- Back Button & Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('directory') }}" class="btn btn-link text-decoration-none text-muted p-0 me-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back
+        </a>
+        <div>
+            <h1 class="h3 fw-bold m-0 text-primary">{{ carrier.payer_name }}</h1>
+            <div class="small text-muted">Verified Payer Information</div>
         </div>
     </div>
 
-    <!-- Top 3 Cards Grid -->
+    {% if show_ads %}
+    <div class="native-ad-container mb-4 py-3">
+        <span class="ad-label">Advertisement</span>
+        <div class="text-dark small fw-medium">Streamline your {{ carrier.payer_name }} claims with AutoClaim Pro.</div>
+    </div>
+    {% endif %}
+
     <div class="row g-4">
-        <!-- Card 1: Carrier Information -->
-        <div class="col-lg-4">
-            <div class="card detail-card h-100 shadow-sm border-0">
-                <div class="card-header bg-white border-bottom fw-bold text-primary py-3">
-                    <i class="fa-solid fa-building me-2"></i>Carrier Information
+        <!-- Payer Information Card -->
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom fw-bold text-primary">
+                    Payer Details
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Company Type</div>
-                        <div class="fw-bold">{{ carrier.company_type or '--' }}</div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">SBS Company #</div>
-                        <div>{{ carrier.sbs_company_number or '--' }}</div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">SBS Legacy #</div>
-                        <div>{{ carrier.sbs_legacy_number or '--' }}</div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Other Carrier Names</div>
-                        <div class="small text-secondary">{{ carrier.other_carrier_names or 'None' }}</div>
-                    </li>
-                </ul>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-0">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted small text-uppercase fw-bold">Payer ID</span>
+                            <span class="fw-bold font-monospace text-dark">{{ carrier.payer_code }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="text-muted small text-uppercase fw-bold mb-2">Clearing Houses</div>
+                            {% if carrier.clearing_house %}
+                                {% for ch in carrier.clearing_house.split(',') %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom-dashed">
+                                    <span class="text-dark">{{ ch.strip() }}</span>
+                                    <span class="badge bg-light text-secondary border">Supported</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted small">No specific clearing house listed.</span>
+                            {% endif %}
+                        </li>
+                        <!-- <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted small text-uppercase fw-bold">Status</span>
+                            {% if carrier.mapping_status == 'approved' %}
+                                <span class="badge bg-success text-white">Verified Active</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending Verification</span>
+                            {% endif %}
+                        </li> -->
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <!-- Card 2: Payer Information -->
-        <div class="col-lg-4">
-            <div class="card detail-card h-100 shadow-sm border-0">
-                <div class="card-header bg-white border-bottom fw-bold text-success py-3">
-                    <i class="fa-solid fa-money-check-dollar me-2"></i>Payer Information
+        <!-- NAIC Association Card -->
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom fw-bold text-primary">
+                    Carrier Association
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-muted small text-uppercase">Payer ID</span>
-                        <span class="fw-bold">
-                            {{ carrier.payer_code or 'N/A' }}
-                            {% if carrier.payer_code %}
-                            <button class="btn btn-link p-0 ms-2 text-secondary" onclick="copyToClipboard('{{ carrier.payer_code }}')" title="Copy Payer ID">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                            {% endif %}
-                        </span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Enrollment Req</span>
-                        <span>
-                            {% if carrier.enrollment == 1 %}
-                            <i class="fa-solid fa-check-circle text-success"></i> Yes
-                            {% else %}
-                            <i class="fa-solid fa-circle-xmark text-muted"></i> No
-                            {% endif %}
-                        </span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Attachments</span>
-                        <span>
-                            {% if carrier.attachment == 1 %}
-                            <i class="fa-solid fa-check-circle text-success"></i> Supported
-                            {% else %}
-                            <span class="text-muted">No</span>
-                            {% endif %}
-                        </span>
-                    </li>
-                     <li class="list-group-item d-flex justify-content-between">
-                        <span>WC / Auto</span>
-                        <span>
-                            {% if carrier.wc_auto == 1 %}
-                            <i class="fa-solid fa-check-circle text-success"></i> Yes
-                            {% else %}
-                            <span class="text-muted">No</span>
-                            {% endif %}
-                        </span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Status</span>
-                        <span>
-                            {% if carrier.available == 1 %}
-                            <span class="badge bg-success">Available</span>
-                            {% else %}
-                            <span class="badge bg-danger">Unavailable</span>
-                            {% endif %}
-                        </span>
-                    </li>
-                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Non-Par</span>
-                        <span>
-                            {% if carrier.non_par == 1 %}
-                            <i class="fa-solid fa-check"></i> Yes
-                            {% else %}
-                            No
-                            {% endif %}
-                        </span>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="small text-muted mb-1">Transactions</div>
-                        <div class="small">{{ carrier.transaction or 'Standard' }}</div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Card 3: NAIC Information -->
-        <div class="col-lg-4">
-            <div class="card detail-card h-100 shadow-sm border-0">
-                <div class="card-header bg-white border-bottom fw-bold text-secondary py-3">
-                    <i class="fa-solid fa-book me-2"></i>NAIC Information
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-muted small text-uppercase">NAIC Cocode</span>
-                        <span class="fw-bold">
-                            {{ carrier.cocode }}
-                            <button class="btn btn-link p-0 ms-2 text-secondary" onclick="copyToClipboard('{{ carrier.cocode }}')" title="Copy NAIC">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </span>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Company Name</div>
-                        <div class="fw-bold">{{ carrier.company_name or '--' }}</div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Short Name</div>
-                        <div>{{ carrier.short_name or '--' }}</div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Licensed In</div>
-                        <div class="small">{{ carrier.company_licensed_in or '--' }}</div>
-                    </li>
-                     <li class="list-group-item">
-                        <div class="text-muted small text-uppercase mb-1">Insurance Types</div>
-                        <div class="small">{{ carrier.insurance_types or '--' }}</div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- NEW: Address & Additional Information Section -->
-    <div class="card mt-4 shadow-sm border-0" style="display: none;">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-location-dot me-2"></i>Contact & Locations</h5>
-        </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <div class="col-md-6 border-end-md">
-                    <h6 class="text-muted text-uppercase fw-bold small mb-3">Address Information</h6>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-0">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted small text-uppercase fw-bold">NAIC Code</span>
+                            <span class="fw-bold font-monospace text-dark">{{ carrier.cocode or 'N/A' }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="text-muted small text-uppercase fw-bold mb-1">Company Name</div>
+                            <div class="fw-medium text-dark">{{ carrier.company_name or 'Not Assigned' }}</div>
+                        </li>
+                    </ul>
                     
-                    {% for addr in carrier.addresses %}
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <span class="badge bg-light text-dark mb-2 border">{{ addr.address_type }}</span>
-                                <address class="mb-0 text-secondary">
-                                    {{ addr.address_line1 }}<br>
-                                    {% if addr.address_line2 %}{{ addr.address_line2 }}<br>{% endif %}
-                                    {{ addr.city }}, {{ addr.state }} {{ addr.zip_code }}<br>
-                                    {{ addr.country }}
-                                </address>
-                            </div>
-                            <button class="btn btn-sm btn-light text-secondary" 
-                                    onclick="copyToClipboard('{{ addr.address_line1 }} {{ addr.city }} {{ addr.state }}')"
-                                    title="Copy Address">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p class="text-muted fst-italic">No addresses on file.</p>
-                    {% endfor %}
-                </div>
-
-                <div class="col-md-6 ps-md-4">
-                    <h6 class="text-muted text-uppercase fw-bold small mb-3">Additional Information</h6>
-                    
-                    <div class="mb-4">
-                        <div class="small fw-bold text-dark mb-2"><i class="fa-solid fa-phone me-2 text-muted"></i>Phone Numbers</div>
-                        <ul class="list-group list-group-flush">
-                            {% for phone in carrier.phones %}
-                            <li class="list-group-item px-0 py-2 border-bottom-0 d-flex justify-content-between">
-                                <span>
-                                    <span class="text-muted me-2">{{ phone.phone_type }}:</span>
-                                    <span class="fw-medium">{{ phone.phone_number }}</span>
-                                </span>
-                                <button class="btn btn-link p-0 text-secondary" onclick="copyToClipboard('{{ phone.phone_number }}')">
-                                    <i class="fa-regular fa-copy"></i>
-                                </button>
-                            </li>
-                            {% else %}
-                            <li class="text-muted small fst-italic">No phones listed.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="small fw-bold text-dark mb-2"><i class="fa-solid fa-envelope me-2 text-muted"></i>Emails</div>
-                        <ul class="list-group list-group-flush">
-                            {% for email in carrier.emails %}
-                            <li class="list-group-item px-0 py-2 border-bottom-0 d-flex justify-content-between">
-                                <span>
-                                    <span class="text-muted me-2">{{ email.email_type }}:</span>
-                                    <a href="mailto:{{ email.email_address }}" class="text-decoration-none">{{ email.email_address }}</a>
-                                </span>
-                                <button class="btn btn-link p-0 text-secondary" onclick="copyToClipboard('{{ email.email_address }}')">
-                                    <i class="fa-regular fa-copy"></i>
-                                </button>
-                            </li>
-                            {% else %}
-                            <li class="text-muted small fst-italic">No emails listed.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <div class="small fw-bold text-dark mb-2"><i class="fa-solid fa-globe me-2 text-muted"></i>Websites</div>
-                        <ul class="list-group list-group-flush">
-                            {% for web in carrier.websites %}
-                            <li class="list-group-item px-0 py-2 border-bottom-0">
-                                <span class="text-muted me-2">{{ web.website_type }}:</span>
-                                <a href="{{ web.website_url }}" target="_blank" class="text-decoration-none">{{ web.website_url }}</a>
-                            </li>
-                            {% else %}
-                            <li class="text-muted small fst-italic">No websites listed.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
+                    <!-- <div class="p-3 bg-light border-top">
+                        <h6 class="small fw-bold text-muted mb-2"><i class="fa-solid fa-circle-info me-1"></i> Important Information</h6>
+                        <p class="small text-muted mb-0">
+                            Please verify the <strong>Statute of Limitations</strong> for claims submission with {{ carrier.payer_name }}. 
+                            Timely filing limits may vary by state and plan type (Commercial vs. Medicaid/Medicare). 
+                            Always check the member's specific policy for pre-authorization requirements.
+                        </p>
+                    </div> -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Audit History Section -->
-    <div class="card mt-4 shadow-sm border-0">
-        <div class="card-header bg-light fw-bold">
-            <i class="fa-solid fa-clock-rotate-left me-2"></i>Audit History
+    <!-- Audit Log Section -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-bottom fw-bold text-muted small text-uppercase">
+            Data Audit Log
         </div>
-        <div class="list-group list-group-flush">
-            {% for log in history %}
-            <div class="list-group-item">
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ log.description }}</h6>
-                    <small class="text-muted">{{ log.changed_at }}</small>
-                </div>
-                <small class="text-primary">By {{ log.changed_by }}</small>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-3">Date</th>
+                            <th>Action</th>
+                            <th>Updated By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td class="ps-3 text-muted small">{{ log.changed_at }}</td>
+                            <td class="small">{{ log.description }}</td>
+                            <td class="small text-muted">{{ log.changed_by }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="ps-3 py-3 text-muted small fst-italic">No recent updates recorded.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% else %}
-            <div class="p-4 text-center text-muted">No recent updates recorded for this carrier.</div>
-            {% endfor %}
         </div>
     </div>
 
