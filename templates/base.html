@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{% block title %}CarrierCodeVerify - Insurance Carrier Database{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Verify insurance carrier NAIC codes, Payer IDs, and claims addresses instantly. The crowdsourced database for insurance professionals.{% endblock %}">
+    
+    <meta property="og:title" content="{% block og_title %}CarrierCodeVerify{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Instant Insurance Carrier Verification.{% endblock %}">
+    <meta property="og:image" content="{{ url_for('static', filename='carrierverify.png') }}">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" href="/static/carrierverify.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    {% block structured_data %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+    
+    {% include 'includes/header.html' %}
+
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

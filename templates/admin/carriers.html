@@ -1,0 +1,180 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Carrier Management</h2>
+    <div>
+        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fa-solid fa-file-csv me-2"></i>Bulk Import
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fa-solid fa-plus me-2"></i>Add New
+        </button>
+    </div>
+</div>
+
+<datalist id="naic_list">
+    {% for n in all_naics %}
+    <option value="{{ n.cocode }}">{{ n.company_name }}</option>
+    {% endfor %}
+</datalist>
+<datalist id="payer_list">
+    {% for p in all_payers %}
+    <option value="{{ p.payer_code }}">{{ p.other_payer_names or '' }}</option>
+    {% endfor %}
+</datalist>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin_carriers') }}" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control" placeholder="Search by Name, NAIC, or Payer ID..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100"><i class="fa-solid fa-search me-2"></i>Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Legal Name</th>
+                    <th>NAIC</th>
+                    <th>Payer ID</th>
+                    <th>Claims Phone</th>
+                    <th>State</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in carriers %}
+                <tr>
+                    <td>{{ c.legal_name }}</td>
+                    <td>{{ c.naic_code or '-' }}</td>
+                    <td>{{ c.payer_id or '-' }}</td>
+                    <td>{{ c.phone_claims or '-' }}</td>
+                    <td>{{ c.state_domicile or '-' }}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                data-bs-toggle="modal" data-bs-target="#editModal{{ c.carrier_id }}">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <a href="{{ url_for('delete_carrier', id=c.carrier_id) }}" 
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Are you sure? This will remove the carrier record.')">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                <div class="modal fade" id="editModal{{ c.carrier_id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <form action="{{ url_for('edit_carrier_admin', id=c.carrier_id) }}" method="POST">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Carrier</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Legal Name</label>
+                                        <input type="text" name="legal_name" class="form-control" value="{{ c.legal_name }}" required>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label>NAIC (Searchable)</label>
+                                            <input class="form-control" list="naic_list" name="naic_code" placeholder="Type to search..." value="{{ c.naic_code }}">
+                                        </div>
+                                        <div class="col">
+                                            <label>Payer ID (Searchable)</label>
+                                            <input class="form-control" list="payer_list" name="payer_id" placeholder="Type to search..." value="{{ c.payer_id }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No carriers found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin_carriers', page=page-1, search=search) }}">Previous</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin_carriers', page=page+1, search=search) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('add_carrier') }}" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Carrier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Legal Name</label>
+                        <input type="text" name="legal_name" class="form-control" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label>NAIC (Searchable)</label>
+                            <input class="form-control" list="naic_list" name="naic_code" placeholder="Type to search...">
+                        </div>
+                        <div class="col">
+                            <label>State</label>
+                            <input type="text" name="state" class="form-control" maxlength="2">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Payer ID (Searchable)</label>
+                        <input class="form-control" list="payer_list" name="payer_id" placeholder="Type to search...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Carrier</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('import_carriers') }}" method="POST" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Import CSV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">Required CSV Columns: <code>legal_name, naic_code, payer_id, state_domicile</code></p>
+                    <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Upload</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

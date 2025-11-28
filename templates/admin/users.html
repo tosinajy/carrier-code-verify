@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>User Management</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newUserModal"><i class="fa-solid fa-user-plus me-2"></i>Add Admin</button>
+</div>
+
+<div class="card shadow-sm">
+    <table class="table mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.user_id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td><span class="badge bg-info">{{ user.role }}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="newUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Add Admin User</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" required></div>
+                    <div class="mb-3"><label>Email</label><input type="email" name="email" class="form-control" required></div>
+                    <div class="mb-3"><label>Password</label><input type="password" name="password" class="form-control" required></div>
+                    <div class="mb-3"><label>Role</label><select name="role" class="form-select"><option>admin</option><option>editor</option></select></div>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Create User</button></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

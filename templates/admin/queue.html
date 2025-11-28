@@ -1,0 +1,75 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<h2 class="mb-4">Edit Approval Queue</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Carrier</th>
+                        <th>Field</th>
+                        <th>Submitted By</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for edit in edits %}
+                    <tr>
+                        <td class="small text-muted">{{ edit.submitted_at }}</td>
+                        <td><a href="{{ url_for('carrier_details', naic_code=edit.naic_code) }}" target="_blank">{{ edit.legal_name }}</a></td>
+                        <td>
+                            {% if edit.field_name == 'FULL_RECORD' %}
+                            <span class="badge bg-primary">Full Profile Update</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ edit.field_name }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small fw-bold">{{ edit.submitter_name or 'Anonymous' }}</div>
+                            <div class="small text-muted">{{ edit.submitter_email }}</div>
+                        </td>
+                        <td class="text-end">
+                            {% if edit.field_name == 'FULL_RECORD' %}
+                            <a href="{{ url_for('review_edit', edit_id=edit.edit_id) }}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-eye me-1"></i>Review
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('approve_edit', edit_id=edit.edit_id, action='approve') }}" class="btn btn-success btn-sm">
+                                <i class="fa-solid fa-check"></i>
+                            </a>
+                            <a href="{{ url_for('approve_edit', edit_id=edit.edit_id, action='reject') }}" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">No pending edits in queue. Good job!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="card-footer bg-white py-3">
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_queue', page=page-1) }}">Previous</a>
+                </li>
+                <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+                <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_queue', page=page+1) }}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

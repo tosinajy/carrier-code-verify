@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Issue | CarrierCodeVerify{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white p-4">
+                    <h2 class="h4 m-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>Report Incorrect Data</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    
+                    <p class="text-muted mb-4">
+                        Help us maintain accuracy. Please describe the incorrect information found for this carrier.
+                    </p>
+
+                    <form action="{{ url_for('report_issue') }}" method="POST">
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="naic_code" class="form-label fw-bold text-secondary small text-uppercase">NAIC Code</label>
+                                <input type="text" class="form-control bg-light" id="naic_code" name="naic_code" value="{{ naic }}" readonly>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="carrier_name" class="form-label fw-bold text-secondary small text-uppercase">Carrier Legal Name</label>
+                                <input type="text" class="form-control bg-light" id="carrier_name" name="carrier_name" value="{{ name }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="comments" class="form-label fw-bold">Describe the Issue <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="comments" name="comments" rows="5" placeholder="Example: The claims phone number listed is disconnected. The correct number is..." required></textarea>
+                        </div>
+
+                        <div style="display:none;">
+                            <label>Leave this field empty</label>
+                            <input type="text" name="website_check" value="">
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{{ url_for('carrier_details', naic_code=naic) }}" class="text-decoration-none text-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger px-5">
+                                Submit Report <i class="fa-solid fa-paper-plane ms-2"></i>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Review Edit Request #{{ edit.edit_id }}</h2>
+        <a href="{{ url_for('admin_queue') }}" class="btn btn-outline-secondary">Back to Queue</a>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Metadata & Changes -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light fw-bold">Request Details</div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Submitter:</strong> {{ edit.submitter_name }}</p>
+                    <p class="mb-1"><strong>Email:</strong> <a href="mailto:{{ edit.submitter_email }}">{{ edit.submitter_email }}</a></p>
+                    <p class="mb-0"><strong>Submitted:</strong> {{ edit.submitted_at }}</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Changes Detected
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Old Value</th>
+                                    <th>New Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Simple diff logic for scalar values -->
+                                {% for key, val in data.items() %}
+                                    {% if key not in ['phones','emails','websites','addresses','lobs','submitter_name','submitter_email'] %}
+                                        {% set old = original.get(key) %}
+                                        <!-- Force string comparison to catch 0 vs '0' etc -->
+                                        {% if old|string != val|string %}
+                                        <tr>
+                                            <td><code>{{ key }}</code></td>
+                                            <td class="text-muted small text-decoration-line-through">{{ old }}</td>
+                                            <td class="text-success fw-bold small">{{ val }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- Lists Check -->
+                                {% if data.phones|length != original.phones|length %}
+                                <tr><td>Phones</td><td>{{ original.phones|length }} items</td><td class="text-success">{{ data.phones|length }} items</td></tr>
+                                {% endif %}
+                                {% if data.emails|length != original.emails|length %}
+                                <tr><td>Emails</td><td>{{ original.emails|length }} items</td><td class="text-success">{{ data.emails|length }} items</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <div class="p-2 text-muted small fst-italic">
+                            Note: List comparisons (Phones/Addresses) require manual JSON review.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Full JSON Payload -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">Full Data Payload (JSON)</div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        The raw data below will overwrite the database record upon approval. You can make final tweaks here.
+                    </p>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <textarea name="final_json" class="form-control font-monospace small" rows="25">{{ data | tojson(indent=4) }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="action" value="reject" class="btn btn-danger px-4">
+                                <i class="fa-solid fa-times me-2"></i>Reject
+                            </button>
+                            <button type="submit" name="action" value="approve" class="btn btn-success px-4">
+                                <i class="fa-solid fa-check me-2"></i>Approve & Apply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

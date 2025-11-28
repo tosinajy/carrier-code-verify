@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container text-center mt-4">
+        <div id="ad-banner-top" class="ad-placeholder ad-banner-top">
+            AD SPACE - LEADERBOARD (970x90)
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-5 fw-bold mb-3">Verify Insurance Carriers Instantly</h1>
+            <p class="lead mb-5 text-secondary mx-auto" style="max-width: 600px;">
+                Access real-time data for NAIC codes, Payer IDs, and claims contact information.
+            </p>
+            
+            <div class="mx-auto" style="max-width: 700px;">
+                <div class="input-group input-group-lg shadow-sm rounded-3 position-relative">
+                    <span class="input-group-text bg-white border-0 ps-4"><i class="fa-solid fa-search text-muted"></i></span>
+                    
+                    <!-- Wrapped Input for Autocomplete -->
+                    <div class="flex-grow-1 position-relative">
+                        <input type="text" id="search-input" class="form-control border-0 ps-2" 
+                               placeholder="Enter Carrier Name, NAIC, or Payer ID..." 
+                               aria-label="Search" 
+                               autocomplete="off">
+                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                    </div>
+
+                    <button class="btn btn-primary px-4" type="button" id="search-button">
+                        Verify Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'includes/results.html' %}
+
+{% endblock %}

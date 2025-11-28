@@ -1,0 +1,39 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<h2 class="mb-4">Email Settings</h2>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    <h5 class="text-primary mb-3">SMTP Configuration</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Mail Server</label>
+                            <input type="text" class="form-control" name="mail_server" value="{{ config.MAIL_SERVER }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Port</label>
+                            <input type="number" class="form-control" name="mail_port" value="{{ config.MAIL_PORT }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sender Email (From)</label>
+                        <input type="email" class="form-control" name="mail_sender" value="{{ config.MAIL_DEFAULT_SENDER }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Admin Receiver Email (To)</label>
+                        <input type="email" class="form-control" name="mail_receiver" value="{{ config.MAIL_ADMIN_RECEIVER }}">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="use_tls" id="tls" {% if config.MAIL_USE_TLS %}checked{% endif %}>
+                        <label class="form-check-label" for="tls">Use TLS Encryption</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

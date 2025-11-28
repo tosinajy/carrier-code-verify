@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+
+{% block title %}Suggest Edit - {{ carrier.legal_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white p-4">
+                    <h2 class="h4 m-0"><i class="fa-solid fa-pen-to-square me-2"></i>Suggest Changes</h2>
+                    <p class="mb-0 mt-2 opacity-75">Edit information for <strong>{{ carrier.legal_name }}</strong>. All changes are reviewed.</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('suggest_edit_form', carrier_id=carrier.carrier_id) }}" class="needs-validation" novalidate>
+                    <div class="card-body p-4">
+                        
+                        <!-- Submitter Info -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3">Your Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Your Name <span class="text-danger">*</span></label>
+                                <input type="text" name="submitter_name" class="form-control" required>
+                                <div class="invalid-feedback">Please enter your name.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Your Email <span class="text-danger">*</span></label>
+                                <input type="email" name="submitter_email" class="form-control" required>
+                                <div class="invalid-feedback">Please enter a valid email.</div>
+                            </div>
+                        </div>
+
+                        <!-- Carrier Information -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3">Carrier Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label">Legal Name <span class="text-danger">*</span></label>
+                                <input type="text" name="legal_name" class="form-control" value="{{ carrier.legal_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Company Type</label>
+                                <select name="company_type" class="form-select">
+                                    <option value="">Select...</option>
+                                    {% for t in lookups.company_types %}
+                                    <option value="{{ t.company_type }}" {% if carrier.company_type == t.company_type %}selected{% endif %}>{{ t.company_type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">AM Best Rating</label>
+                                <input type="text" name="am_best_rating" class="form-control" value="{{ carrier.am_best_rating }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">State Domicile</label>
+                                <select name="state_domicile" class="form-select">
+                                    <option value="">Select...</option>
+                                    {% for s in lookups.states %}
+                                    <option value="{{ s.state_id }}" {% if carrier.state_domicile == s.state_id %}selected{% endif %}>{{ s.state_id }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">SBS Company #</label>
+                                <input type="text" name="sbs_company_number" class="form-control" value="{{ carrier.sbs_company_number }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">SBS Legacy #</label>
+                                <input type="text" name="sbs_legacy_number" class="form-control" value="{{ carrier.sbs_legacy_number }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Other Carrier Names</label>
+                                <input type="text" name="other_carrier_names" class="form-control" value="{{ carrier.other_carrier_names }}">
+                            </div>
+                        </div>
+
+                        <!-- NAIC Information -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3">NAIC Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">NAIC Cocode <span class="text-danger">*</span></label>
+                                <input type="text" name="cocode" class="form-control" value="{{ carrier.cocode }}" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Company Name (NAIC)</label>
+                                <input type="text" name="company_name" class="form-control" value="{{ carrier.company_name }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Short Name</label>
+                                <input type="text" name="short_name" class="form-control" value="{{ carrier.short_name }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Licensed In</label>
+                                <input type="text" name="company_licensed_in" class="form-control" value="{{ carrier.company_licensed_in }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Insurance Types</label>
+                                <input type="text" name="insurance_types" class="form-control" value="{{ carrier.insurance_types }}">
+                            </div>
+                        </div>
+
+                        <!-- Payer Information -->
+                        <h5 class="text-success border-bottom pb-2 mb-3">Payer Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Payer ID</label>
+                                <input type="text" name="payer_code" class="form-control" value="{{ carrier.payer_code }}">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Other Payer Names</label>
+                                <input type="text" name="other_payer_names" class="form-control" value="{{ carrier.other_payer_names }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Transactions</label>
+                                <input type="text" name="transaction" class="form-control" value="{{ carrier.transaction }}">
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="enrollment" id="enrollment" {% if carrier.enrollment == 1 %}checked{% endif %}>
+                                    <label class="form-check-label" for="enrollment">Enrollment</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="attachment" id="attachment" {% if carrier.attachment == 1 %}checked{% endif %}>
+                                    <label class="form-check-label" for="attachment">Attachment</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="wc_auto" id="wc_auto" {% if carrier.wc_auto == 1 %}checked{% endif %}>
+                                    <label class="form-check-label" for="wc_auto">WC/Auto</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="available" id="available" {% if carrier.available == 1 %}checked{% endif %}>
+                                    <label class="form-check-label" for="available">Available</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="non_par" id="non_par" {% if carrier.non_par == 1 %}checked{% endif %}>
+                                    <label class="form-check-label" for="non_par">Non-Par</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Websites -->
+                        <h5 class="text-success border-bottom pb-2 mb-3">Websites</h5>
+                        <div id="websites-container">
+                            {% for w in carrier.websites %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="website_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.website_types %}
+                                        <option value="{{ t.website_type }}" {% if w.website_type == t.website_type %}selected{% endif %}>{{ t.website_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="website_url[]" class="form-control form-control-sm" value="{{ w.website_url }}" placeholder="URL"></div>
+                            </div>
+                            {% endfor %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="website_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.website_types %}
+                                        <option value="{{ t.website_type }}">{{ t.website_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="website_url[]" class="form-control form-control-sm" placeholder="New URL"></div>
+                            </div>
+                        </div>
+
+                        <!-- Phones -->
+                        <h5 class="text-success border-bottom pb-2 mb-3 mt-4">Phone Numbers</h5>
+                        <div id="phones-container">
+                            {% for p in carrier.phones %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="phone_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.phone_types %}
+                                        <option value="{{ t.phone_type }}" {% if p.phone_type == t.phone_type %}selected{% endif %}>{{ t.phone_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="phone_number[]" class="form-control form-control-sm" value="{{ p.phone_number }}" placeholder="Number"></div>
+                            </div>
+                            {% endfor %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="phone_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.phone_types %}
+                                        <option value="{{ t.phone_type }}">{{ t.phone_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="phone_number[]" class="form-control form-control-sm" placeholder="New Number"></div>
+                            </div>
+                        </div>
+
+                        <!-- Emails -->
+                        <h5 class="text-success border-bottom pb-2 mb-3 mt-4">Emails</h5>
+                        <div id="emails-container">
+                            {% for e in carrier.emails %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="email_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.email_types %}
+                                        <option value="{{ t.email_type }}" {% if e.email_type == t.email_type %}selected{% endif %}>{{ t.email_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="email_address[]" class="form-control form-control-sm" value="{{ e.email_address }}" placeholder="Email Address"></div>
+                            </div>
+                            {% endfor %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <select name="email_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Type</option>
+                                        {% for t in lookups.email_types %}
+                                        <option value="{{ t.email_type }}">{{ t.email_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-8"><input type="text" name="email_address[]" class="form-control form-control-sm" placeholder="New Email"></div>
+                            </div>
+                        </div>
+
+                        <!-- Addresses -->
+                        <h5 class="text-success border-bottom pb-2 mb-3 mt-4">Addresses</h5>
+                        {% for a in carrier.addresses %}
+                        <div class="border rounded p-2 mb-2 bg-light">
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <!-- NEW: Dropdown for Address Type -->
+                                    <select name="address_type[]" class="form-select form-select-sm fw-bold">
+                                        <option value="">Select Address Type</option>
+                                        {% for t in lookups.address_types %}
+                                        <option value="{{ t.address_type }}" {% if a.address_type == t.address_type %}selected{% endif %}>{{ t.address_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12"><input type="text" name="address_line1[]" class="form-control form-control-sm" value="{{ a.address_line1 }}" placeholder="Line 1"></div>
+                                <div class="col-5"><input type="text" name="city[]" class="form-control form-control-sm" value="{{ a.city }}" placeholder="City"></div>
+                                <div class="col-3">
+                                    <select name="state[]" class="form-select form-select-sm">
+                                        <option value="">State</option>
+                                        {% for s in lookups.states %}
+                                        <option value="{{ s.state_id }}" {% if a.state == s.state_id %}selected{% endif %}>{{ s.state_id }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-4"><input type="text" name="zip_code[]" class="form-control form-control-sm" value="{{ a.zip_code }}" placeholder="Zip"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <!-- New Address Block -->
+                        <div class="border rounded p-2 mb-2 bg-light">
+                            <div class="text-muted small mb-1">Add New Address:</div>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <select name="address_type[]" class="form-select form-select-sm">
+                                        <option value="">Select Address Type</option>
+                                        {% for t in lookups.address_types %}
+                                        <option value="{{ t.address_type }}">{{ t.address_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12"><input type="text" name="address_line1[]" class="form-control form-control-sm" placeholder="Line 1"></div>
+                                <div class="col-5"><input type="text" name="city[]" class="form-control form-control-sm" placeholder="City"></div>
+                                <div class="col-3">
+                                    <select name="state[]" class="form-select form-select-sm">
+                                        <option value="">State</option>
+                                        {% for s in lookups.states %}
+                                        <option value="{{ s.state_id }}">{{ s.state_id }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-4"><input type="text" name="zip_code[]" class="form-control form-control-sm" placeholder="Zip"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer bg-white p-4 text-end">
+                        <a href="{{ url_for('carrier_details', naic_code=carrier.cocode) }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Submit Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap validation script
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}
